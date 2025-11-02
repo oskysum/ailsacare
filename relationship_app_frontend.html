@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relationship Trust Assessment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- PayPal SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .file-input-label {
+            transition: all 0.2s ease;
+        }
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .markdown-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .markdown-content p {
+            margin-bottom: 1rem;
+        }
+        .markdown-content ul, .markdown-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .markdown-content li {
+            margin-bottom: 0.5rem;
+        }
+        .markdown-content strong {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-[#181818] text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+    <!-- Dark mode detection -->
+    <script>
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+
+    <div class="container mx-auto px-4 py-8 max-w-3xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="flex items-center justify-center mb-4">
+                <i class="fas fa-heart-pulse text-4xl text-primary"></i>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold mb-3">Relationship Trust Assessment</h1>
+            <p class="text-gray-600 dark:text-gray-400 text-base md:text-lg">A confidential tool to help you understand your relationship concerns</p>
+            
+            <!-- Important Disclaimers -->
+            <div class="mt-4 space-y-3">
+                <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <p class="text-sm text-blue-800 dark:text-blue-300">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        This tool uses AI to analyze the information you provide. It's designed to offer perspective, not definitive answers.
+                    </p>
+                </div>
+                
+                <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <p class="text-sm text-red-800 dark:text-red-300 font-semibold mb-2">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Important Legal Disclaimer
+                    </p>
+                    <p class="text-xs text-red-700 dark:text-red-400">
+                        This assessment is for informational purposes only and should not be considered professional advice. We are not responsible for any relationship disputes, arguments, or decisions made based on the results of this assessment. The AI analysis is based solely on the information you provide and may not reflect the full complexity of your relationship. For serious concerns, please consult a licensed therapist or relationship counselor.
+                    </p>
+                </div>
+
+                <div class="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                    <p class="text-sm text-amber-800 dark:text-amber-300">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        <strong>More Information = Better Results:</strong> While all fields are optional except ages and relationship duration, providing more details (photos, chat histories, context) will significantly improve the accuracy of the assessment.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form id="assessmentForm" class="space-y-6">
+            <!-- Personal Information Section -->
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-user-circle text-primary mr-2"></i>
+                    Personal Information
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="userAge" class="block text-sm font-medium mb-2">Your Age <span class="text-red-500">*</span></label>
+                        <input type="number" id="userAge" min="18" max="120" required
+                               class="w-full px-4 py-3 text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition">
+                    </div>
+                    <div>
+                        <label for="partnerAge" class="block text-sm font-medium mb-2">Partner's Age <span class="text-red-500">*</span></label>
+                        <input type="number" id="partnerAge" min="18" max="120" required
+                               class="w-full px-4 py-3 text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition">
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label for="relationshipDuration" class="block text-sm font-medium mb-2">How long have you been together? <span class="text-red-500">*</span></label>
+                    <input type="text" id="relationshipDuration" placeholder="e.g., 2 years, 6 months" required
+                           class="w-full px-4 py-3 text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition">
+                </div>
+            </div>
+
+            <!-- Photos Section -->
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-camera text-primary mr-2"></i>
+                    Photos (Optional but Recommended)
+                </h2>
+
+                <!-- User's Photo -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">Your Photo</label>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Upload a photo of yourself for comprehensive analysis</p>
+                    <label for="userPhoto" class="file-input-label cursor-pointer block">
+                        <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-primary transition">
+                            <i class="fas fa-user text-3xl text-gray-400 mb-2"></i>
+                            <p class="text-sm text-gray-600 dark:text-gray-400" id="userPhotoLabel">Click to upload your photo</p>
+                        </div>
+                        <input type="file" id="userPhoto" accept="image/*" class="hidden">
+                    </label>
+                </div>
+
+                <!-- Partner's Photo -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Partner's Photo</label>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Upload a photo of your partner for comprehensive analysis</p>
+                    <label for="partnerPhoto" class="file-input-label cursor-pointer block">
+                        <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-primary transition">
+                            <i class="fas fa-camera text-3xl text-gray-400 mb-2"></i>
+                            <p class="text-sm text-gray-600 dark:text-gray-400" id="partnerPhotoLabel">Click to upload partner's photo</p>
+                        </div>
+                        <input type="file" id="partnerPhoto" accept="image/*" class="hidden">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Exclusivity Conversation -->
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-comments text-primary mr-2"></i>
+                    Exclusivity Discussion (Optional)
+                </h2>
+                <label for="exclusivityDetails" class="block text-sm font-medium mb-2">
+                    Have you had a conversation about being exclusive? Please share details.
+                </label>
+                <textarea id="exclusivityDetails" rows="4"
+                          placeholder="Describe the conversation about exclusivity, when it happened, and what was agreed upon..."
+                          class="w-full px-4 py-3 text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition resize-none"></textarea>
+            </div>
+
+            <!-- File Uploads Section -->
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-upload text-primary mr-2"></i>
+                    Supporting Materials (Optional but Recommended)
+                </h2>
+
+                <!-- Chat History: Partner & Others -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">Chat History: Partner & Others</label>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Upload screenshots or text files of conversations between your partner and other people</p>
+                    <label for="partnerOthersChat" class="file-input-label cursor-pointer block">
+                        <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-primary transition">
+                            <i class="fas fa-file-alt text-3xl text-gray-400 mb-2"></i>
+                            <p class="text-sm text-gray-600 dark:text-gray-400" id="partnerOthersChatLabel">Click to upload chat history</p>
+                        </div>
+                        <input type="file" id="partnerOthersChat" accept="image/*,.txt,.pdf" multiple class="hidden">
+                    </label>
+                </div>
+
+                <!-- Chat History: You & Partner -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Chat History: You & Partner</label>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Upload screenshots or text files of conversations between you and your partner</p>
+                    <label for="yourPartnerChat" class="file-input-label cursor-pointer block">
+                        <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-primary transition">
+                            <i class="fas fa-file-alt text-3xl text-gray-400 mb-2"></i>
+                            <p class="text-sm text-gray-600 dark:text-gray-400" id="yourPartnerChatLabel">Click to upload chat history</p>
+                        </div>
+                        <input type="file" id="yourPartnerChat" accept="image/*,.txt,.pdf" multiple class="hidden">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Background Context -->
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-pencil-alt text-primary mr-2"></i>
+                    Additional Context (Optional but Recommended)
+                </h2>
+                <label for="backgroundInfo" class="block text-sm font-medium mb-2">
+                    What concerns or signs have led you to use this tool?
+                </label>
+                <textarea id="backgroundInfo" rows="6"
+                          placeholder="Share any behaviors, patterns, or specific incidents that have raised concerns. The more detail you provide, the better the assessment..."
+                          class="w-full px-4 py-3 text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition resize-none"></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center">
+                <button type="submit" id="submitBtn"
+                        class="bg-primary hover:bg-purple-700 text-white font-semibold px-8 py-4 rounded-lg transition transform hover:scale-105 shadow-lg text-base md:text-lg">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    Get Assessment
+                </button>
+            </div>
+        </form>
+
+        <!-- Basic Preview Results (Before Payment) -->
+        <div id="previewResults" class="hidden mt-8 fade-in">
+            <div class="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-6 md:p-8 shadow-lg border border-purple-100 dark:border-gray-700">
+                <!-- Basic Assessment Preview -->
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold mb-4">Initial Assessment Complete</h2>
+                    <div class="inline-block bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg mb-6">
+                        <p class="text-gray-600 dark:text-gray-400 mb-2">Basic Analysis</p>
+                        <div id="previewVerdict" class="text-3xl font-bold text-gray-500 mb-2">Analyzing...</div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Simple Yes/No Result</p>
+                    </div>
+                </div>
+
+                <!-- Unlock Premium Analysis -->
+                <div class="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-6 shadow-lg border-2 border-yellow-300 dark:border-yellow-700">
+                    <div class="text-center mb-6">
+                        <div class="inline-block bg-primary text-white rounded-full p-4 mb-4">
+                            <i class="fas fa-unlock-alt text-3xl"></i>
+                        </div>
+                        <h3 class="text-xl md:text-2xl font-bold mb-3">Unlock Detailed Analysis</h3>
+                        <p class="text-gray-700 dark:text-gray-300 mb-4">
+                            For just <strong class="text-2xl text-primary">$1.00 USD</strong>, unlock your complete relationship health assessment:
+                        </p>
+
+                        <!-- Benefits List -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 text-left max-w-lg mx-auto">
+                            <ul class="space-y-3">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <span><strong>Percentage Score:</strong> Precise likelihood assessment (0-100%)</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <span><strong>Relationship Health Score:</strong> Overall relationship wellness rating</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <span><strong>Detailed Reasoning:</strong> Comprehensive analysis of key factors</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <span><strong>Expert Advice:</strong> Actionable recommendations and next steps</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <span><strong>Communication Tips:</strong> How to address concerns with your partner</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <span><strong>Professional Counseling Guidance:</strong> When and how to seek help</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            This helps us maintain the service and provide quality AI-powered analysis.
+                        </p>
+                    </div>
+
+                    <!-- PayPal Button Container -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-auto">
+                        <div id="paypal-button-container" class="mb-4"></div>
+                        <p class="text-xs text-center text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-shield-alt mr-1"></i>
+                            Secure payment processed by PayPal
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-6 text-center">
+                    <button onclick="cancelPayment()"
+                            class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 text-sm underline">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        Back to form
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden mt-8 fade-in">
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-8 text-center shadow-sm">
+                <div class="inline-block animate-spin text-4xl text-primary mb-4">
+                    <i class="fas fa-spinner"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Analyzing Your Information</h3>
+                <p class="text-gray-600 dark:text-gray-400">Please wait while we carefully review the details you've provided...</p>
+            </div>
+        </div>
+
+        <!-- Results Section (After Payment) -->
+        <div id="resultsSection" class="hidden mt-8 fade-in">
+            <div class="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-6 md:p-8 shadow-lg border border-purple-100 dark:border-gray-700">
+                <!-- Premium Badge -->
+                <div class="text-center mb-6">
+                    <span class="inline-block bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+                        <i class="fas fa-crown mr-2"></i>Premium Analysis Unlocked
+                    </span>
+                </div>
+
+                <!-- Assessment Scores Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- Likelihood Score -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg text-center">
+                        <h3 class="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300">
+                            <i class="fas fa-percentage text-primary mr-2"></i>Likelihood Score
+                        </h3>
+                        <div id="assessmentScore" class="text-5xl font-bold text-primary mb-2">--</div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Probability Assessment</p>
+                    </div>
+
+                    <!-- Relationship Health Score -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg text-center">
+                        <h3 class="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300">
+                            <i class="fas fa-heart-pulse text-primary mr-2"></i>Relationship Health
+                        </h3>
+                        <div id="healthScore" class="text-5xl font-bold text-primary mb-2">--</div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Overall Wellness</p>
+                    </div>
+                </div>
+
+                <!-- Analysis Content -->
+                <div id="analysisContent" class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm markdown-content">
+                    <!-- Content will be inserted here -->
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                    <button onclick="resetForm()"
+                            class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold px-6 py-3 rounded-lg transition text-base">
+                        <i class="fas fa-redo mr-2"></i>
+                        New Assessment
+                    </button>
+                </div>
+            </div>
+
+            <!-- Professional Help Recommendation (Shows based on results) -->
+            <div id="counselingRecommendation" class="hidden mt-6 bg-orange-50 dark:bg-orange-900/20 rounded-xl p-6 border-2 border-orange-300 dark:border-orange-700">
+                <h3 class="text-lg font-semibold mb-3 flex items-center text-orange-800 dark:text-orange-300">
+                    <i class="fas fa-user-md mr-2"></i>
+                    Professional Counseling Strongly Recommended
+                </h3>
+                <p class="text-orange-700 dark:text-orange-400 mb-4">
+                    Based on your assessment results, we strongly recommend seeking professional help. A licensed therapist or relationship counselor can provide personalized guidance and support to help you navigate this difficult situation.
+                </p>
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-4">
+                    <p class="text-sm font-semibold mb-2">Find a professional counselor:</p>
+                    <ul class="space-y-2 text-sm">
+                        <li><i class="fas fa-external-link-alt text-orange-600 dark:text-orange-400 mr-2"></i><a href="https://www.psychologytoday.com/us/therapists" target="_blank" class="text-primary hover:underline">Psychology Today Therapist Directory</a></li>
+                        <li><i class="fas fa-external-link-alt text-orange-600 dark:text-orange-400 mr-2"></i><a href="https://www.aamft.org/Directories/Find_a_Therapist.aspx" target="_blank" class="text-primary hover:underline">AAMFT Relationship Counselor Locator</a></li>
+                        <li><i class="fas fa-external-link-alt text-orange-600 dark:text-orange-400 mr-2"></i><a href="https://www.betterhelp.com/" target="_blank" class="text-primary hover:underline">BetterHelp Online Therapy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Resources Section -->
+            <div class="mt-6 bg-green-50 dark:bg-green-900/20 rounded-xl p-6 border border-green-200 dark:border-green-800">
+                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                    <i class="fas fa-hands-helping text-green-600 dark:text-green-400 mr-2"></i>
+                    Support Resources
+                </h3>
+                <ul class="space-y-2 text-sm">
+                    <li><i class="fas fa-phone text-green-600 dark:text-green-400 mr-2"></i>National Domestic Violence Hotline: 1-800-799-7233</li>
+                    <li><i class="fas fa-comments text-green-600 dark:text-green-400 mr-2"></i>Crisis Text Line: Text HOME to 741741</li>
+                    <li><i class="fas fa-user-md text-green-600 dark:text-green-400 mr-2"></i>Find a therapist: <a href="https://www.psychologytoday.com/us/therapists" target="_blank" class="text-primary hover:underline">Psychology Today</a></li>
+                    <li><i class="fas fa-heart text-green-600 dark:text-green-400 mr-2"></i>Relationship counseling: <a href="https://www.aamft.org/Directories/Find_a_Therapist.aspx" target="_blank" class="text-primary hover:underline">AAMFT Therapist Locator</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store form data globally
+        let formDataStore = {
+            prompt: '',
+            images: []
+        };
+
+        // Helper function to convert file to base64
+        async function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // File input handlers
+        document.getElementById('userPhoto').addEventListener('change', function(e) {
+            const label = document.getElementById('userPhotoLabel');
+            if (e.target.files.length > 0) {
+                label.textContent = `Selected: ${e.target.files[0].name}`;
+            } else {
+                label.textContent = 'Click to upload your photo';
+            }
+        });
+
+        document.getElementById('partnerPhoto').addEventListener('change', function(e) {
+            const label = document.getElementById('partnerPhotoLabel');
+            if (e.target.files.length > 0) {
+                label.textContent = `Selected: ${e.target.files[0].name}`;
+            } else {
+                label.textContent = 'Click to upload partner\'s photo';
+            }
+        });
+
+        document.getElementById('partnerOthersChat').addEventListener('change', function(e) {
+            const label = document.getElementById('partnerOthersChatLabel');
+            if (e.target.files.length > 0) {
+                label.textContent = `Selected: ${e.target.files.length} file(s)`;
+            } else {
+                label.textContent = 'Click to upload chat history';
+            }
+        });
+
+        document.getElementById('yourPartnerChat').addEventListener('change', function(e) {
+            const label = document.getElementById('yourPartnerChatLabel');
+            if (e.target.files.length > 0) {
+                label.textContent = `Selected: ${e.target.files.length} file(s)`;
+            } else {
+                label.textContent = 'Click to upload chat history';
+            }
+        });
+
+        // Initialize PayPal button
+        function initPayPalButton() {
+            document.getElementById('paypal-button-container').innerHTML = '';
+
+            paypal.Buttons({
+                createOrder: function(data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: '1.00',
+                                currency_code: 'USD'
+                            },
+                            description: 'Relationship Trust Assessment - AI Analysis'
+                        }]
+                    });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(details) {
+                        console.log('Payment completed by ' + details.payer.name.given_name);
+                        processDetailedAssessment();
+                    });
+                },
+                onError: function(err) {
+                    console.error('PayPal error:', err);
+                    showCustomAlert("Payment Error", "There was an issue processing your payment. Please try again.");
+                },
+                onCancel: function(data) {
+                    showCustomAlert("Payment Cancelled", "Your payment was cancelled. You can try again when ready.");
+                }
+            }).render('#paypal-button-container');
+        }
+
+        // Process basic preview (before payment)
+        async function processPreview() {
+            document.getElementById('loadingState').classList.remove('hidden');
+
+            const previewPrompt = `Based on the following relationship information, provide a simple YES or NO answer to whether there are concerning signs:
+
+${formDataStore.prompt}
+
+Provide ONLY a simple answer: YES (if there are concerning signs) or NO (if things seem okay). Keep your response to one word followed by a very brief one-sentence explanation.`;
+
+            try {
+                const imageData = await Promise.all(
+                    formDataStore.images.map(async (file) => ({
+                        type: 'image',
+                        source: {
+                            type: 'base64',
+                            media_type: file.type,
+                            data: await fileToBase64(file)
+                        }
+                    }))
+                );
+
+                const response = await fetch('/.netlify/functions/claude', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: previewPrompt,
+                        images: imageData
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('previewResults').classList.remove('hidden');
+
+                const content = data.content.toLowerCase();
+                const previewDiv = document.getElementById('previewVerdict');
+
+                if (content.includes('yes') || content.includes('likely') || content.includes('probable')) {
+                    previewDiv.textContent = 'YES';
+                    previewDiv.className = 'text-3xl font-bold text-red-500 mb-2';
+                } else if (content.includes('no') || content.includes('unlikely') || content.includes('improbable')) {
+                    previewDiv.textContent = 'NO';
+                    previewDiv.className = 'text-3xl font-bold text-green-500 mb-2';
+                } else {
+                    previewDiv.textContent = 'UNCERTAIN';
+                    previewDiv.className = 'text-3xl font-bold text-yellow-500 mb-2';
+                }
+
+                initPayPalButton();
+                document.getElementById('previewResults').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            } catch (err) {
+                console.error('Preview error:', err);
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('assessmentForm').classList.remove('hidden');
+                showCustomAlert("Error", `Failed to generate preview: ${err.message || 'Please try again.'}`);
+            }
+        }
+
+        // Process detailed assessment after payment
+        async function processDetailedAssessment() {
+            document.getElementById('previewResults').classList.add('hidden');
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+
+            const detailedPrompt = formDataStore.prompt.replace(
+                'Please provide:',
+                'Please provide a comprehensive analysis including:\n\n**SCORES (Display these prominently at the start):**\n- Likelihood Score: XX% (0-100% probability of infidelity)\n- Relationship Health Score: XX% (overall wellness of the relationship)\n\nThen provide:'
+            );
+
+            try {
+                const imageData = await Promise.all(
+                    formDataStore.images.map(async (file) => ({
+                        type: 'image',
+                        source: {
+                            type: 'base64',
+                            media_type: file.type,
+                            data: await fileToBase64(file)
+                        }
+                    }))
+                );
+
+                const response = await fetch('/.netlify/functions/claude', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: detailedPrompt,
+                        images: imageData
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('resultsSection').classList.remove('hidden');
+
+                const content = data.content;
+
+                // Extract likelihood percentage
+                const likelihoodMatch = content.match(/(?:likelihood|probability)[:\s]*(\d+)%/i) || content.match(/(\d+)%/);
+                if (likelihoodMatch) {
+                    const likelihood = parseInt(likelihoodMatch[1]);
+                    document.getElementById('assessmentScore').textContent = likelihood + '%';
+                    
+                    // Show counseling recommendation if likelihood is high
+                    if (likelihood > 60) {
+                        document.getElementById('counselingRecommendation').classList.remove('hidden');
+                    }
+                }
+
+                // Extract relationship health percentage
+                const healthMatch = content.match(/(?:relationship health|health score|wellness)[:\s]*(\d+)%/i);
+                if (healthMatch) {
+                    document.getElementById('healthScore').textContent = healthMatch[1] + '%';
+                } else {
+                    if (likelihoodMatch) {
+                        const likelihood = parseInt(likelihoodMatch[1]);
+                        const health = Math.max(10, 100 - likelihood);
+                        document.getElementById('healthScore').textContent = health + '%';
+                    }
+                }
+
+                const analysisDiv = document.getElementById('analysisContent');
+                analysisDiv.innerHTML = marked.parse(content);
+
+            } catch (err) {
+                console.error('Detailed assessment error:', err);
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('previewResults').classList.remove('hidden');
+                showCustomAlert("Error", `Failed to generate detailed assessment: ${err.message || 'Please try again.'}`);
+            }
+        }
+
+        // Cancel payment and return to form
+        function cancelPayment() {
+            document.getElementById('previewResults').classList.add('hidden');
+            document.getElementById('assessmentForm').classList.remove('hidden');
+        }
+
+        // Form submission
+        document.getElementById('assessmentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const userAge = document.getElementById('userAge').value;
+            const partnerAge = document.getElementById('partnerAge').value;
+            const relationshipDuration = document.getElementById('relationshipDuration').value;
+            const exclusivityDetails = document.getElementById('exclusivityDetails').value;
+            const backgroundInfo = document.getElementById('backgroundInfo').value;
+
+            // Collect all images
+            const images = [];
+            
+            const userPhoto = document.getElementById('userPhoto').files[0];
+            if (userPhoto) images.push(userPhoto);
+
+            const partnerPhoto = document.getElementById('partnerPhoto').files[0];
+            if (partnerPhoto) images.push(partnerPhoto);
+
+            const partnerOthersChat = document.getElementById('partnerOthersChat').files;
+            for (let file of partnerOthersChat) {
+                images.push(file);
+            }
+
+            const yourPartnerChat = document.getElementById('yourPartnerChat').files;
+            for (let file of yourPartnerChat) {
+                images.push(file);
+            }
+
+            // Build comprehensive prompt
+            const prompt = `You are a relationship counselor and psychologist. Please analyze the following information to assess the likelihood of infidelity in this relationship. Provide your response in the following format:
+
+IMPORTANT: Start your response with percentages representing:
+1. Likelihood of infidelity (0-100%)
+2. Overall relationship health (0-100%)
+
+**Personal Information:**
+- User's age: ${userAge}
+- Partner's age: ${partnerAge}
+- Relationship duration: ${relationshipDuration}
+
+${exclusivityDetails ? `**Exclusivity Conversation:**\n${exclusivityDetails}\n` : '**Exclusivity Conversation:** Not provided'}
+
+${backgroundInfo ? `**User's Concerns:**\n${backgroundInfo}\n` : '**User's Concerns:** Not provided'}
+
+${images.length > 0 ? `**Attached Materials:**\n- ${images.some(f => f === userPhoto) ? 'User photo included\n- ' : ''}${images.some(f => f === partnerPhoto) ? 'Partner photo included\n- ' : ''}${Array.from(partnerOthersChat).length > 0 ? `${Array.from(partnerOthersChat).length} chat file(s) between partner and others\n- ` : ''}${Array.from(yourPartnerChat).length > 0 ? `${Array.from(yourPartnerChat).length} chat file(s) between user and partner` : ''}\n\nPlease review all attached images for additional context.` : '**Note:** No files were attached. Analysis will be based on text information only, which may be less comprehensive.'}
+
+Please provide:
+1. A percentage assessment (0-100%) of the likelihood of infidelity
+2. A percentage assessment (0-100%) of overall relationship health
+3. A detailed analysis explaining your assessment
+4. Key factors that influenced your conclusion
+5. Constructive advice on how to address this situation
+6. Recommendations for next steps
+7. **Important:** If the likelihood of infidelity is high (above 50%), strongly recommend seeking professional counseling and provide guidance on how to approach this
+
+Be compassionate, objective, and evidence-based in your analysis. Remember this is a sensitive situation that can significantly impact someone's life.
+
+Provide ONLY your analysis in markdown format. Start with the percentages clearly labeled.`;
+
+            formDataStore.prompt = prompt;
+            formDataStore.images = images;
+
+            document.getElementById('assessmentForm').classList.add('hidden');
+            processPreview();
+        });
+
+        function resetForm() {
+            document.getElementById('assessmentForm').reset();
+            document.getElementById('userPhotoLabel').textContent = 'Click to upload your photo';
+            document.getElementById('partnerPhotoLabel').textContent = 'Click to upload partner\'s photo';
+            document.getElementById('partnerOthersChatLabel').textContent = 'Click to upload chat history';
+            document.getElementById('yourPartnerChatLabel').textContent = 'Click to upload chat history';
+            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('previewResults').classList.add('hidden');
+            document.getElementById('counselingRecommendation').classList.add('hidden');
+            document.getElementById('assessmentForm').classList.remove('hidden');
+            formDataStore = { prompt: '', images: [] };
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showCustomAlert(title, message) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4 fade-in">
+                    <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-gray-100">${title}</h3>
+                    <p class="text-gray-700 dark:text-gray-300 mb-6">${message}</p>
+                    <div class="flex justify-end">
+                        <button onclick="this.closest('.fixed').remove()"
+                                class="px-6 py-2 bg-primary text-white hover:bg-purple-700 rounded-lg transition font-semibold">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+    </script>
+</body>
+</html>
